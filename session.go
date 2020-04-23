@@ -698,6 +698,7 @@ func (s *session) handlePacketImpl(rp *receivedPacket) bool {
 	var processed bool
 	data := rp.data
 	p := rp
+	s.sentPacketHandler.ReceivedBytes(protocol.ByteCount(len(data)))
 	for len(data) > 0 {
 		if counter > 0 {
 			p = p.Clone()
@@ -1425,7 +1426,7 @@ func (s *session) sendPacket() (bool, error) {
 
 	if !s.handshakeConfirmed {
 		now := time.Now()
-		packet, err := s.packer.PackCoalescedPacket(protocol.MaxByteCount)
+		packet, err := s.packer.PackCoalescedPacket(s.sentPacketHandler.AmplificationWindow())
 		if err != nil || packet == nil {
 			return false, err
 		}
